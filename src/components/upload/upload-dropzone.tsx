@@ -57,8 +57,8 @@ export function UploadDropzone({
         className={cn(
           "relative rounded-[28px] border border-dashed px-6 py-8 transition duration-200",
           isActive
-            ? "border-cyan-300/80 bg-cyan-400/10 shadow-[inset_0_0_0_1px_rgba(103,232,249,0.18)]"
-            : "border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.025))]",
+            ? "border-[var(--accent-strong)] bg-[color:color-mix(in_srgb,var(--accent-strong)_10%,transparent)] shadow-[inset_0_0_0_1px_rgba(103,232,249,0.18)]"
+            : "border-[var(--line)] bg-[var(--panel-soft)]",
         )}
       >
         <input
@@ -70,30 +70,30 @@ export function UploadDropzone({
         />
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-xl space-y-3">
-            <div className="inline-flex size-14 items-center justify-center rounded-[18px] border border-cyan-300/20 bg-cyan-400/10 text-cyan-200 shadow-[0_0_30px_rgba(103,232,249,0.12)]">
+            <div className="inline-flex size-14 items-center justify-center rounded-[18px] border border-[var(--line)] bg-[var(--panel-elevated)] text-[var(--accent-strong)] shadow-[0_0_30px_rgba(103,232,249,0.12)]">
               <UploadCloud className="size-6" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold tracking-[-0.04em] text-white">
+              <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
                 Upload a UI screenshot or SVG
               </h2>
-              <p className="text-sm leading-6 text-slate-300">
+              <p className="text-sm leading-6 text-[var(--text-muted)]">
                 Drag in a dashboard, landing page, onboarding flow, or exported design.
                 ChromaShift extracts palette structure, infers roles, and previews remapped themes instantly.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+            <div className="flex flex-wrap gap-2 text-xs text-[var(--text-soft)]">
               <span>Accepts PNG, JPG, WebP, SVG</span>
-              <span>•</span>
+              <span>&bull;</span>
               <span>Client-side analysis</span>
-              <span>•</span>
+              <span>&bull;</span>
               <span>Best with product UI screenshots</span>
-              <span>•</span>
+              <span>&bull;</span>
               <span>Download-ready previews</span>
             </div>
           </div>
 
-          <div className="flex flex-col items-start gap-3 sm:flex-row lg:flex-col">
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row lg:flex-col">
             <Button
               className="w-full gap-2 sm:w-auto"
               onClick={() => inputRef.current?.click()}
@@ -114,14 +114,14 @@ export function UploadDropzone({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
-              className="mt-5 flex flex-col gap-2 rounded-2xl border border-white/8 bg-slate-950/50 px-4 py-3 text-sm"
+              className="mt-5 flex flex-col gap-2 rounded-2xl border border-[var(--line)] bg-[var(--panel-elevated)] px-4 py-3 text-sm"
             >
               {currentFileName ? (
-                <div className="text-slate-200">
-                  Active source: <span className="font-medium text-white">{currentFileName}</span>
+                <div className="text-[var(--text-muted)]">
+                  Active source: <span className="font-medium text-[var(--text-primary)]">{currentFileName}</span>
                 </div>
               ) : null}
-              {error ? <div className="text-rose-300">{error}</div> : null}
+              {error ? <div className="text-rose-500">{error}</div> : null}
             </motion.div>
           )}
         </AnimatePresence>

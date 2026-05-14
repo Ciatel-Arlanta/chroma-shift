@@ -79,20 +79,22 @@ export function BeforeAfterPreview({
     <Card className="overflow-hidden p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-white">Live preview</div>
-          <p className="text-sm text-slate-400">
+          <div className="text-sm font-semibold text-[var(--text-primary)]">Live preview</div>
+          <p className="text-sm text-[var(--text-muted)]">
             Drag the divider to compare the source and remapped theme, then download the generated asset directly.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex gap-2 rounded-full border border-white/10 bg-white/5 p-1">
+          <div className="flex gap-2 rounded-full border border-[var(--line)] bg-[var(--panel-soft)] p-1">
             {(["split", "original", "remapped"] as const).map((value) => (
               <button
                 key={value}
                 onClick={() => onModeChange(value)}
                 className={cn(
                   "rounded-full px-3 py-1.5 text-sm capitalize transition",
-                  mode === value ? "bg-white text-slate-950" : "text-slate-300",
+                  mode === value
+                    ? "bg-[var(--text-primary)] text-[var(--background)]"
+                    : "text-[var(--text-muted)]",
                 )}
               >
                 {value}
@@ -110,12 +112,12 @@ export function BeforeAfterPreview({
 
       <div
         ref={containerRef}
-        className="relative min-h-[380px] overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.12),transparent_50%),linear-gradient(180deg,rgba(15,23,42,0.9),rgba(2,6,18,0.95))]"
+        className="relative min-h-[380px] overflow-hidden rounded-[28px] border border-[var(--line)] bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--accent-strong)_10%,transparent),transparent_50%),linear-gradient(180deg,color-mix(in_srgb,var(--panel-elevated)_90%,transparent),var(--panel-soft))]"
       >
         <div className="absolute inset-0 p-4">
-          <div className="grid size-full place-items-center rounded-[22px] border border-white/8 bg-slate-950/65">
+          <div className="grid size-full place-items-center rounded-[22px] border border-[var(--line)] bg-[var(--panel-elevated)]">
             {!originalLayer || !transformedLayer ? (
-              <div className="max-w-sm text-center text-sm leading-6 text-slate-400">
+              <div className="max-w-sm text-center text-sm leading-6 text-[var(--text-muted)]">
                 Upload a UI screenshot or SVG to generate a live side-by-side preview.
               </div>
             ) : (
@@ -133,14 +135,14 @@ export function BeforeAfterPreview({
                 )}
                 {mode === "split" ? (
                   <>
-                    <div className="absolute left-5 top-5 z-10 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1.5 text-[11px] uppercase tracking-[0.24em] text-slate-300">
+                    <div className="absolute left-5 top-5 z-10 rounded-full border border-[var(--line)] bg-[var(--panel)] px-3 py-1.5 text-[11px] uppercase tracking-[0.24em] text-[var(--text-muted)]">
                       Original
                     </div>
-                    <div className="absolute right-5 top-5 z-10 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-[11px] uppercase tracking-[0.24em] text-cyan-100">
+                    <div className="absolute right-5 top-5 z-10 rounded-full border border-[var(--accent-strong)]/20 bg-[color:color-mix(in_srgb,var(--accent-strong)_10%,transparent)] px-3 py-1.5 text-[11px] uppercase tracking-[0.24em] text-[var(--accent-strong)]">
                       Remapped
                     </div>
                     <div
-                      className="absolute top-0 bottom-0 w-px bg-white/70"
+                      className="absolute top-0 bottom-0 w-px bg-[var(--text-primary)]/40"
                       style={{ left: `calc(${position}% - 0.5px)` }}
                     />
                     <button
@@ -148,11 +150,11 @@ export function BeforeAfterPreview({
                         setDragging(true);
                         updateFromClientX(event.clientX);
                       }}
-                      className="absolute top-1/2 z-10 -translate-y-1/2 -translate-x-1/2 rounded-full border border-cyan-200/40 bg-slate-950/80 p-2 shadow-[0_0_35px_rgba(102,231,255,0.2)]"
+                      className="absolute top-1/2 z-10 -translate-y-1/2 -translate-x-1/2 rounded-full border border-[var(--accent-strong)]/30 bg-[var(--panel)] p-2 shadow-[0_0_35px_rgba(102,231,255,0.2)]"
                       style={{ left: `${position}%` }}
                       aria-label="Adjust preview split"
                     >
-                      <MoveHorizontal className="size-4 text-cyan-100" />
+                      <MoveHorizontal className="size-4 text-[var(--accent-strong)]" />
                     </button>
                   </>
                 ) : null}

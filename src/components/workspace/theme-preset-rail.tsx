@@ -24,8 +24,8 @@ export function ThemePresetRail({ activePreset, onSelect }: ThemePresetRailProps
   return (
     <Card className="p-5">
       <div className="mb-4">
-        <div className="text-sm font-semibold text-white">Preset remappers</div>
-        <p className="text-sm text-slate-400">Each preset applies semantic remapping instead of blind recoloring.</p>
+        <div className="text-sm font-semibold text-[var(--text-primary)]">Preset remappers</div>
+        <p className="text-sm text-[var(--text-muted)]">Each preset applies semantic remapping instead of blind recoloring.</p>
       </div>
 
       <div className="grid gap-3">
@@ -38,29 +38,31 @@ export function ThemePresetRail({ activePreset, onSelect }: ThemePresetRailProps
               className={cn(
                 "group relative overflow-hidden rounded-[24px] border p-4 text-left transition",
                 isActive
-                  ? "border-cyan-300/50 bg-[linear-gradient(180deg,rgba(34,211,238,0.12),rgba(34,211,238,0.05))]"
-                  : "border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.025))] hover:border-white/14 hover:bg-white/[0.06]",
+                  ? "border-[var(--accent-strong)]/50 bg-[color:color-mix(in_srgb,var(--accent-strong)_10%,transparent)]"
+                  : "border-[var(--line)] bg-[var(--panel-soft)] hover:bg-[var(--panel-elevated)]",
               )}
             >
               {isActive ? (
                 <motion.div
                   layoutId="preset-highlight"
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(103,232,249,0.12),transparent_70%)]"
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--accent-strong)_18%,transparent),transparent_70%)]"
                 />
               ) : null}
               <div className="relative">
                 <div className="mb-1 flex items-center justify-between gap-3">
-                  <div className="text-sm font-semibold text-white">{preset.title}</div>
+                  <div className="text-sm font-semibold text-[var(--text-primary)]">{preset.title}</div>
                   <div
                     className={cn(
                       "rounded-full px-2 py-1 text-[10px] uppercase tracking-[0.22em]",
-                      isActive ? "bg-white/12 text-cyan-100" : "bg-white/8 text-slate-500",
+                      isActive
+                        ? "bg-[var(--panel-elevated)] text-[var(--accent-strong)]"
+                        : "bg-[var(--panel-elevated)] text-[var(--text-soft)]",
                     )}
                   >
                     {isActive ? "Active" : "Preset"}
                   </div>
                 </div>
-                <div className="text-sm leading-6 text-slate-400">{preset.description}</div>
+                <div className="text-sm leading-6 text-[var(--text-muted)]">{preset.description}</div>
               </div>
             </button>
           );

@@ -13,8 +13,8 @@ export function PaletteInspector({ colors, assignments }: PaletteInspectorProps)
     <Card className="p-5">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="text-sm font-semibold text-white">Palette extraction</div>
-          <p className="text-sm text-slate-400">Dominant colors merged by perceptual similarity.</p>
+          <div className="text-sm font-semibold text-[var(--text-primary)]">Palette extraction</div>
+          <p className="text-sm text-[var(--text-muted)]">Dominant colors merged by perceptual similarity.</p>
         </div>
       </div>
 
@@ -27,23 +27,23 @@ export function PaletteInspector({ colors, assignments }: PaletteInspectorProps)
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03 }}
-              className="rounded-2xl border border-white/8 bg-white/[0.03] p-3"
+              className="rounded-2xl border border-[var(--line)] bg-[var(--panel-soft)] p-3"
             >
               <div className="flex items-center gap-3">
                 <div
-                  className="size-10 rounded-xl border border-white/10"
+                  className="size-10 rounded-xl border border-[var(--line)]"
                   style={{ backgroundColor: color.hex }}
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="truncate font-mono text-xs text-white">{color.hex}</span>
-                    <span className="text-xs text-slate-400">
+                    <span className="truncate font-mono text-xs text-[var(--text-primary)]">{color.hex}</span>
+                    <span className="text-xs text-[var(--text-muted)]">
                       {Math.round(color.population * 100)}%
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                  <div className="mt-1 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--text-soft)]">
                     <span>{role?.role ?? "unassigned"}</span>
-                    <span>•</span>
+                    <span>&bull;</span>
                     <span>{role ? `${Math.round(role.confidence * 100)}%` : "cluster"}</span>
                   </div>
                 </div>

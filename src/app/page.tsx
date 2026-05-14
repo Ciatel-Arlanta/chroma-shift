@@ -1,11 +1,13 @@
+import { FeatureSections } from "@/components/marketing/feature-sections";
 import { HeroSection } from "@/components/marketing/hero-section";
-import { AnalysisWorkspace } from "@/components/workspace/analysis-workspace";
+import { SiteHeader } from "@/components/marketing/site-header";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#020611] text-white">
+    <main className="min-h-screen text-[var(--text-primary)]">
+      <SiteHeader />
       <HeroSection />
-      <AnalysisWorkspace />
+      <FeatureSections />
     </main>
   );
 }

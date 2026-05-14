@@ -24,6 +24,41 @@ function contrastAgainst(background: string, candidate: string) {
   return wcagContrast(background, candidate) ?? 1;
 }
 
+function accentScore(color: ExtractedColor, backgroundHex: string) {
+  const sample = getOklch(color.hex);
+  const background = getOklch(backgroundHex);
+  const lightnessDistance = Math.abs(sample.l - 0.62);
+  const backgroundDistance = Math.abs(sample.l - background.l);
+  const populationBonus = Math.min(color.population * 7.5, 1.5);
+  const chromaBonus = sample.c * 4.2;
+  const contrastBonus = Math.min(contrastAgainst(backgroundHex, color.hex), 5) * 0.16;
+  const highlightPenalty = sample.l > 0.82 ? (sample.l - 0.82) * 4.8 : 0;
+  const tinyPenalty = color.population < 0.035 ? (0.035 - color.population) * 22 : 0;
+  const washedPenalty = sample.c < 0.06 ? (0.06 - sample.c) * 6 : 0;
+  const nearBackgroundPenalty = backgroundDistance < 0.12 ? (0.12 - backgroundDistance) * 4 : 0;
+
+  return (
+    chromaBonus +
+    populationBonus +
+    contrastBonus -
+    lightnessDistance * 1.15 -
+    highlightPenalty -
+    tinyPenalty -
+    washedPenalty -
+    nearBackgroundPenalty
+  );
+}
+
+function accentStrongScore(color: ExtractedColor, backgroundHex: string) {
+  const sample = getOklch(color.hex);
+  const contrast = contrastAgainst(backgroundHex, color.hex);
+  const base = accentScore(color, backgroundHex);
+  const extraContrast = Math.min(contrast, 6) * 0.32;
+  const extraHighlightPenalty = sample.l > 0.86 ? (sample.l - 0.86) * 4 : 0;
+
+  return base + extraContrast - extraHighlightPenalty;
+}
+
 function buildAssignment(
   role: SemanticRole,
   choice: ExtractedColor,
@@ -92,10 +127,7 @@ export function inferSemanticRoles(colors: ExtractedColor[]): SemanticAssignment
   const accent =
     pickDistinct(
       sorted,
-      (color) => {
-        const sample = getOklch(color.hex);
-        return sample.c * 3 + color.population * 0.5 - Math.abs(sample.l - 0.62);
-      },
+      (color) => accentScore(color, background.hex),
       excluded,
     ) ?? textSecondary;
 
@@ -104,7 +136,7 @@ export function inferSemanticRoles(colors: ExtractedColor[]): SemanticAssignment
   const accentStrong =
     pickDistinct(
       sorted,
-      (color) => getOklch(color.hex).c * 2 + contrastAgainst(background.hex, color.hex) * 0.3,
+      (color) => accentStrongScore(color, background.hex),
       excluded,
     ) ?? accent;
 

@@ -304,12 +304,12 @@ export function AnalysisWorkspace() {
                   />
                 </motion.div>
               ) : (
-                <Card className="grid min-h-56 place-items-center p-8 text-center text-slate-400">
+                <Card className="grid min-h-56 place-items-center p-8 text-center text-[var(--text-muted)]">
                   <div className="max-w-md">
-                    <div className="mb-3 inline-flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-cyan-200">
+                    <div className="mb-3 inline-flex size-12 items-center justify-center rounded-2xl border border-[var(--line)] bg-[var(--panel-soft)] text-[var(--accent-strong)]">
                       {isBusy ? <LoaderCircle className="size-5 animate-spin" /> : <WandSparkles className="size-5" />}
                     </div>
-                    <h3 className="mb-2 text-xl font-semibold text-white">Ready to remap</h3>
+                    <h3 className="mb-2 text-xl font-semibold text-[var(--text-primary)]">Ready to remap</h3>
                     <p className="text-sm leading-6">
                       Upload a real product UI to extract palette structure, apply semantic theme presets, and export global.css tokens.
                     </p>
@@ -327,20 +327,20 @@ export function AnalysisWorkspace() {
                 assignments={analysis.semanticAssignments}
               />
             ) : (
-              <Card className="p-5 text-sm leading-6 text-slate-400">
+              <Card className="p-5 text-sm leading-6 text-[var(--text-muted)]">
                 Semantic roles and palette clusters will appear here after analysis.
               </Card>
             )}
             <Card className="p-5">
-              <div className="mb-3 text-sm font-semibold text-white">Why this feels intelligent</div>
-              <ul className="space-y-3 text-sm leading-6 text-slate-400">
+              <div className="mb-3 text-sm font-semibold text-[var(--text-primary)]">Why this feels intelligent</div>
+              <ul className="space-y-3 text-sm leading-6 text-[var(--text-muted)]">
                 <li>Largest low-chroma regions are treated as backgrounds and surfaces.</li>
                 <li>High-contrast small clusters are promoted into text and border candidates.</li>
                 <li>High-chroma colors are preserved as accent roles across all presets.</li>
                 <li>Accessibility mode repairs contrast instead of preserving broken source choices.</li>
               </ul>
               <div className="mt-4">
-                <Button variant="ghost" className="px-0 text-cyan-200">
+                <Button variant="ghost" className="px-0 text-[var(--accent-strong)]">
                   Deterministic, browser-side, and API-free
                 </Button>
               </div>

@@ -39,6 +39,10 @@ function remapColor(hex: string, assignments: SemanticAssignment[], tokens: Them
   return formatHex(tokens[token]) ?? token;
 }
 
+function packRgb(r: number, g: number, b: number) {
+  return (r << 16) | (g << 8) | b;
+}
+
 export async function remapRasterPreview(
   file: File,
   extractedColors: ExtractedColor[],
@@ -67,6 +71,7 @@ export async function remapRasterPreview(
 
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const mapping = new Map<string, [number, number, number]>();
+    const perPixelCache = new Map<number, [number, number, number]>();
 
     extractedColors.forEach((color) => {
       mapping.set(color.hex, chroma(remapColor(color.hex, assignments, tokens)).rgb() as [number, number, number]);
@@ -78,12 +83,20 @@ export async function remapRasterPreview(
         continue;
       }
 
-      const source = chroma(
-        imageData.data[index],
-        imageData.data[index + 1],
-        imageData.data[index + 2],
-      ).hex();
+      const red = imageData.data[index];
+      const green = imageData.data[index + 1];
+      const blue = imageData.data[index + 2];
+      const key = packRgb(red, green, blue);
+      const cachedReplacement = perPixelCache.get(key);
 
+      if (cachedReplacement) {
+        imageData.data[index] = cachedReplacement[0];
+        imageData.data[index + 1] = cachedReplacement[1];
+        imageData.data[index + 2] = cachedReplacement[2];
+        continue;
+      }
+
+      const source = chroma(red, green, blue).hex();
       let nearest = extractedColors[0]?.hex ?? source;
       let distance = Number.POSITIVE_INFINITY;
 
@@ -100,6 +113,7 @@ export async function remapRasterPreview(
         continue;
       }
 
+      perPixelCache.set(key, replacement);
       imageData.data[index] = replacement[0];
       imageData.data[index + 1] = replacement[1];
       imageData.data[index + 2] = replacement[2];
