@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --background: #07111d;
+  --foreground: #f5f7fb;
+  --muted: #8d9ab0;
+  --border: rgba(196, 210, 255, 0.12);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(118, 255, 214, 0.12), transparent 24%),
+    radial-gradient(circle at 84% 16%, rgba(255, 174, 116, 0.1), transparent 22%),
+    radial-gradient(circle at 52% 82%, rgba(83, 144, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, #050b15 0%, #08111d 38%, #091625 100%);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-space-grotesk), sans-serif;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  background-position: center center;
+}
+
+::selection {
+  background: rgba(102, 231, 255, 0.3);
+  color: white;
+}
+
+a,
+button {
+  cursor: pointer;
+}
+
+pre {
+  font-family: var(--font-ibm-plex-mono), monospace;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 20%);
+  mask-image: linear-gradient(180deg, black, transparent 82%);
+}
