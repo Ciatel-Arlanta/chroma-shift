@@ -1,8 +1,9 @@
 "use client";
 
-import { differenceEuclidean, formatHex } from "culori";
+import { converter, differenceCiede2000, formatHex } from "culori";
 import chroma from "chroma-js";
 
+import { clamp } from "@/lib/utils";
 import type { ExtractedColor, SemanticAssignment, SemanticRole, ThemeTokens } from "./types";
 
 const roleToToken: Record<SemanticRole, keyof ThemeTokens> = {
@@ -16,14 +17,20 @@ const roleToToken: Record<SemanticRole, keyof ThemeTokens> = {
   border: "border",
 };
 
-const compare = differenceEuclidean("lab");
+const compare = differenceCiede2000();
+const toOklch = converter("oklch");
+const toRgb = converter("rgb");
+
+/* ------------------------------------------------------------------ */
+/*  Role / token resolution                                           */
+/* ------------------------------------------------------------------ */
 
 function pickRole(hex: string, assignments: SemanticAssignment[]) {
   let bestRole: SemanticRole = "background";
   let bestDistance = Number.POSITIVE_INFINITY;
 
   assignments.forEach((assignment) => {
-    const distance = compare(hex, assignment.color);
+    const distance = compare(hex, assignment.color) ?? Infinity;
     if (distance < bestDistance) {
       bestDistance = distance;
       bestRole = assignment.role;
@@ -42,6 +49,58 @@ function remapColor(hex: string, assignments: SemanticAssignment[], tokens: Them
 function packRgb(r: number, g: number, b: number) {
   return (r << 16) | (g << 8) | b;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Precomputed OKLCH lookup for centroids and targets                */
+/* ------------------------------------------------------------------ */
+
+interface OklchTuple {
+  l: number;
+  c: number;
+  h: number;
+}
+
+function safeOklch(hex: string): OklchTuple {
+  const parsed = toOklch(hex);
+  return {
+    l: parsed?.l ?? 0,
+    c: parsed?.c ?? 0,
+    h: parsed?.h ?? 0,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Lightness-relative remap – preserves shadows, gradients, depth    */
+/*                                                                    */
+/*  Instead of flat-replacing pixel → token, we compute:              */
+/*    target.L + (pixel.L - centroid.L) × dampen                      */
+/*  This keeps the lightness structure of the original image          */
+/* ------------------------------------------------------------------ */
+
+const L_DAMPEN = 0.82;
+const C_DAMPEN = 0.45;
+
+function remapPixelOklch(
+  pixelOklch: OklchTuple,
+  centroidOklch: OklchTuple,
+  targetOklch: OklchTuple,
+): [number, number, number] {
+  const remappedL = clamp(targetOklch.l + (pixelOklch.l - centroidOklch.l) * L_DAMPEN, 0, 1);
+  const remappedC = clamp(targetOklch.c + (pixelOklch.c - centroidOklch.c) * C_DAMPEN, 0, 0.37);
+  const remappedH = targetOklch.h;
+
+  const rgb = toRgb({ mode: "oklch", l: remappedL, c: remappedC, h: remappedH });
+
+  return [
+    Math.round(clamp((rgb?.r ?? 0) * 255, 0, 255)),
+    Math.round(clamp((rgb?.g ?? 0) * 255, 0, 255)),
+    Math.round(clamp((rgb?.b ?? 0) * 255, 0, 255)),
+  ];
+}
+
+/* ------------------------------------------------------------------ */
+/*  Raster preview remapping                                          */
+/* ------------------------------------------------------------------ */
 
 export async function remapRasterPreview(
   file: File,
@@ -70,12 +129,26 @@ export async function remapRasterPreview(
     context.drawImage(image, 0, 0);
 
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const mapping = new Map<string, [number, number, number]>();
-    const perPixelCache = new Map<number, [number, number, number]>();
+
+    // Precompute: centroid hex → { targetRgb, centroidOklch, targetOklch }
+    const centroidOklchMap = new Map<string, OklchTuple>();
+    const targetOklchMap = new Map<string, OklchTuple>();
+    const flatMapping = new Map<string, [number, number, number]>();
 
     extractedColors.forEach((color) => {
-      mapping.set(color.hex, chroma(remapColor(color.hex, assignments, tokens)).rgb() as [number, number, number]);
+      const targetHex = remapColor(color.hex, assignments, tokens);
+      flatMapping.set(color.hex, chroma(targetHex).rgb() as [number, number, number]);
+      centroidOklchMap.set(color.hex, safeOklch(color.hex));
+      targetOklchMap.set(color.hex, safeOklch(targetHex));
     });
+
+    // Precompute centroid OKLCH as arrays for fast iteration
+    const centroidHexes = extractedColors.map((c) => c.hex);
+    const centroidOklchs = centroidHexes.map((h) => centroidOklchMap.get(h)!);
+    const targetOklchs = centroidHexes.map((h) => targetOklchMap.get(h)!);
+
+    // Per-pixel cache keyed by packed RGB → final [r, g, b]
+    const perPixelCache = new Map<number, [number, number, number]>();
 
     for (let index = 0; index < imageData.data.length; index += 4) {
       const alpha = imageData.data[index + 3];
@@ -87,31 +160,35 @@ export async function remapRasterPreview(
       const green = imageData.data[index + 1];
       const blue = imageData.data[index + 2];
       const key = packRgb(red, green, blue);
-      const cachedReplacement = perPixelCache.get(key);
+      const cached = perPixelCache.get(key);
 
-      if (cachedReplacement) {
-        imageData.data[index] = cachedReplacement[0];
-        imageData.data[index + 1] = cachedReplacement[1];
-        imageData.data[index + 2] = cachedReplacement[2];
+      if (cached) {
+        imageData.data[index] = cached[0];
+        imageData.data[index + 1] = cached[1];
+        imageData.data[index + 2] = cached[2];
         continue;
       }
 
+      // Find nearest centroid using CIEDE2000
       const source = chroma(red, green, blue).hex();
-      let nearest = extractedColors[0]?.hex ?? source;
-      let distance = Number.POSITIVE_INFINITY;
+      let nearestIdx = 0;
+      let bestDist = Infinity;
 
-      extractedColors.forEach((color) => {
-        const current = compare(source, color.hex);
-        if (current < distance) {
-          distance = current;
-          nearest = color.hex;
+      for (let ci = 0; ci < centroidHexes.length; ci++) {
+        const d = compare(source, centroidHexes[ci]) ?? Infinity;
+        if (d < bestDist) {
+          bestDist = d;
+          nearestIdx = ci;
         }
-      });
-
-      const replacement = mapping.get(nearest);
-      if (!replacement) {
-        continue;
       }
+
+      // Lightness-relative remap
+      const pixelOklch = safeOklch(source);
+      const replacement = remapPixelOklch(
+        pixelOklch,
+        centroidOklchs[nearestIdx],
+        targetOklchs[nearestIdx],
+      );
 
       perPixelCache.set(key, replacement);
       imageData.data[index] = replacement[0];
@@ -125,6 +202,10 @@ export async function remapRasterPreview(
     URL.revokeObjectURL(sourceUrl);
   }
 }
+
+/* ------------------------------------------------------------------ */
+/*  SVG remapping (unchanged – SVGs don't have shadow artifacts)      */
+/* ------------------------------------------------------------------ */
 
 function updateStyle(style: string, assignments: SemanticAssignment[], tokens: ThemeTokens) {
   return style

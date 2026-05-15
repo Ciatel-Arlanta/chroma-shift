@@ -14,9 +14,59 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://chromashift.dev";
+
 export const metadata: Metadata = {
-  title: "ChromaShift",
-  description: "Intelligent UI theme remapping for screenshots and SVGs.",
+  title: {
+    default: "ChromaShift — Deterministic UI Theme Remapper",
+    template: "%s | ChromaShift",
+  },
+  description:
+    "Upload a UI screenshot or SVG and instantly generate production-ready themes. Browser-side processing, no AI APIs, fully deterministic.",
+  keywords: [
+    "theme generator",
+    "UI remapping",
+    "color palette",
+    "screenshot to theme",
+    "design tool",
+    "accessibility",
+    "CSS variables",
+    "Tailwind theme",
+  ],
+  authors: [{ name: "ChromaShift" }],
+  creator: "ChromaShift",
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: "ChromaShift",
+    title: "ChromaShift — Deterministic UI Theme Remapper",
+    description:
+      "Turn any product screenshot into a polished, shareable theme concept. Browser-side, API-free, instant output.",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "ChromaShift — Upload, remap, export production-ready UI themes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ChromaShift — Deterministic UI Theme Remapper",
+    description:
+      "Upload a screenshot. Get 6 polished theme variants. Export CSS, Tailwind, or JSON. All in the browser.",
+    images: ["/og.png"],
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

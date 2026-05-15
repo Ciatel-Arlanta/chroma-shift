@@ -6,7 +6,13 @@ export type ThemePreset =
   | "pastel"
   | "cyberpunk"
   | "monochrome"
-  | "accessibility";
+  | "accessibility"
+  | "custom";
+
+export interface CustomPalette {
+  colors: string[]; // normalised hex values (3–10 colors)
+  label: string;    // user-visible name
+}
 
 export type SemanticRole =
   | "background"

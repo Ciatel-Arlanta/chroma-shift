@@ -1,7 +1,7 @@
 import { converter, formatCss, wcagContrast } from "culori";
 import chroma from "chroma-js";
 
-import type { SemanticAssignment, ThemePreset, ThemeTokens } from "./types";
+import type { CustomPalette, SemanticAssignment, ThemePreset, ThemeTokens } from "./types";
 
 const toOklch = converter("oklch");
 
@@ -64,7 +64,15 @@ function buildTokensFromBase(base: {
   };
 }
 
-export function generateThemeTokens(assignments: SemanticAssignment[], preset: ThemePreset): ThemeTokens {
+export function generateThemeTokens(
+  assignments: SemanticAssignment[],
+  preset: ThemePreset,
+  customPalette?: CustomPalette,
+): ThemeTokens {
+  if (preset === "custom" && customPalette) {
+    return generateCustomTokens(customPalette);
+  }
+
   const colors = assignmentMap(assignments);
   const accentHue = chroma(colors.accent).set(
     "oklch.c",
@@ -151,3 +159,78 @@ export function generateThemeTokens(assignments: SemanticAssignment[], preset: T
       });
   }
 }
+
+/* ------------------------------------------------------------------ */
+/*  Custom palette → semantic role assignment                         */
+/*                                                                    */
+/*  Given 3-10 arbitrary colors, sort by luminance and chroma to      */
+/*  intelligently pick background, surface, text, accent, border.     */
+/* ------------------------------------------------------------------ */
+
+function generateCustomTokens(palette: CustomPalette): ThemeTokens {
+  const hexes = palette.colors.slice(0, 10);
+
+  // Sort by luminance (lightest first)
+  const byLuminance = [...hexes].sort(
+    (a, b) => chroma(b).luminance() - chroma(a).luminance(),
+  );
+
+  // Sort by chroma (most colorful first)
+  const byChroma = [...hexes].sort(
+    (a, b) => chroma(b).get("oklch.c") - chroma(a).get("oklch.c"),
+  );
+
+  // Decide if user wants a light or dark theme based on average luminance
+  const avgLum = hexes.reduce((s, h) => s + chroma(h).luminance(), 0) / hexes.length;
+  const isDark = avgLum < 0.35;
+
+  // Pick background: lightest color for light theme, darkest for dark theme
+  const background = isDark ? byLuminance[byLuminance.length - 1] : byLuminance[0];
+
+  // Pick text: opposite end of luminance spectrum from background
+  const textPrimary = isDark ? byLuminance[0] : byLuminance[byLuminance.length - 1];
+
+  // Pick accent: most chromatic color (that isn't background or text)
+  const accent =
+    byChroma.find((c) => c !== background && c !== textPrimary) ?? byChroma[0];
+
+  // Pick accent strong: second most chromatic (or darken/brighten accent)
+  const accentStrong =
+    byChroma.find((c) => c !== background && c !== textPrimary && c !== accent) ??
+    (isDark ? chroma(accent).brighten(0.4).hex() : chroma(accent).darken(0.4).hex());
+
+  // Pick surface: second lightest (or brightest) that isn't already used
+  const used = new Set([background, textPrimary, accent, accentStrong]);
+  const surface =
+    byLuminance.find((c) => !used.has(c)) ??
+    (isDark ? chroma(background).brighten(0.5).hex() : chroma(background).darken(0.15).hex());
+  used.add(surface);
+
+  // Pick border: mid-luminance low-chroma color
+  const border =
+    byLuminance.find((c) => !used.has(c)) ??
+    chroma.mix(background, textPrimary, 0.25, "oklch").hex();
+  used.add(border);
+
+  // Surface muted: another mid color or derive
+  const surfaceMuted =
+    byLuminance.find((c) => !used.has(c)) ??
+    chroma.mix(background, surface, 0.5, "oklch").hex();
+
+  // Text secondary: lighter variant of textPrimary
+  const textSecondary = isDark
+    ? chroma(textPrimary).darken(1.2).hex()
+    : chroma(textPrimary).brighten(1.2).hex();
+
+  return buildTokensFromBase({
+    background,
+    surface,
+    surfaceMuted,
+    textPrimary,
+    textSecondary,
+    accent,
+    accentStrong,
+    border,
+  });
+}
+

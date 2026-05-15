@@ -11,6 +11,7 @@ import { BeforeAfterPreview } from "@/components/preview/before-after-preview";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { UploadDropzone } from "@/components/upload/upload-dropzone";
+import { CustomPaletteInput } from "@/components/workspace/custom-palette-input";
 import { ThemePresetRail } from "@/components/workspace/theme-preset-rail";
 import { scoreThemeAccessibility } from "@/lib/color/accessibility";
 import { extractRasterPalette, extractSvgPalette } from "@/lib/color/extract";
@@ -18,6 +19,7 @@ import { remapRasterPreview, remapSvg } from "@/lib/color/remap";
 import { inferSemanticRoles } from "@/lib/color/semantic";
 import { generateThemeTokens } from "@/lib/color/themes";
 import type {
+  CustomPalette,
   GeneratedTheme,
   SourceKind,
   ThemeAnalysisResult,
@@ -76,17 +78,27 @@ export function AnalysisWorkspace() {
   const [analysis, setAnalysis] = React.useState<ThemeAnalysisResult | null>(null);
   const [generatedTheme, setGeneratedTheme] = React.useState<GeneratedTheme | null>(null);
   const [activePreset, setActivePreset] = React.useState<ThemePreset>("dark");
+  const [customPalette, setCustomPalette] = React.useState<CustomPalette | null>(null);
   const [mode, setMode] = React.useState<"split" | "original" | "remapped">("split");
   const [isBusy, setIsBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   const applyPreset = React.useCallback(
-    async (nextPreset: ThemePreset, analysisResult: ThemeAnalysisResult, currentSource: SourceState) => {
+    async (
+      nextPreset: ThemePreset,
+      analysisResult: ThemeAnalysisResult,
+      currentSource: SourceState,
+      palette?: CustomPalette | null,
+    ) => {
       if (!currentSource) {
         return;
       }
 
-      const tokens = generateThemeTokens(analysisResult.semanticAssignments, nextPreset);
+      const tokens = generateThemeTokens(
+        analysisResult.semanticAssignments,
+        nextPreset,
+        palette ?? undefined,
+      );
       const accessibilityReport = scoreThemeAccessibility(
         tokens,
         analysisResult.semanticAssignments,
@@ -131,7 +143,24 @@ export function AnalysisWorkspace() {
       }
       setIsBusy(true);
       try {
-        await applyPreset(nextPreset, analysis, source);
+        await applyPreset(nextPreset, analysis, source, nextPreset === "custom" ? customPalette : null);
+      } finally {
+        setIsBusy(false);
+      }
+    },
+    [analysis, applyPreset, source, customPalette],
+  );
+
+  const handleCustomPaletteApply = React.useCallback(
+    async (palette: CustomPalette) => {
+      setCustomPalette(palette);
+      setActivePreset("custom");
+      if (!analysis || !source) {
+        return;
+      }
+      setIsBusy(true);
+      try {
+        await applyPreset("custom", analysis, source, palette);
       } finally {
         setIsBusy(false);
       }
@@ -321,6 +350,10 @@ export function AnalysisWorkspace() {
 
           <div className="space-y-6">
             <ThemePresetRail activePreset={activePreset} onSelect={(preset) => void handlePresetSelect(preset)} />
+            <CustomPaletteInput
+              onApply={(palette) => void handleCustomPaletteApply(palette)}
+              isActive={activePreset === "custom"}
+            />
             {analysis ? (
               <PaletteInspector
                 colors={analysis.extractedColors}
