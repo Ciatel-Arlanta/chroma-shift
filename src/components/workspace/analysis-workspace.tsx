@@ -295,8 +295,8 @@ export function AnalysisWorkspace() {
           isBusy={isBusy}
         />
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_420px]">
-          <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1.35fr)_420px]">
+          <div className="space-y-6 min-w-0">
             <BeforeAfterPreview
               originalUrl={source?.originalUrl}
               transformedUrl={generatedTheme?.transformedPreviewUrl}
@@ -315,15 +315,21 @@ export function AnalysisWorkspace() {
             />
 
             <AnimatePresence mode="wait">
-              {generatedTheme ? (
+              {generatedTheme && analysis ? (
                 <motion.div
                   key={generatedTheme.preset}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
-                  className="grid gap-6 lg:grid-cols-2"
+                  className="grid gap-6 xl:grid-cols-2"
                 >
-                  <AccessibilityPanel report={generatedTheme.accessibilityReport} />
+                  <div className="space-y-6">
+                    <AccessibilityPanel report={generatedTheme.accessibilityReport} />
+                    <PaletteInspector
+                      colors={analysis.extractedColors}
+                      assignments={analysis.semanticAssignments}
+                    />
+                  </div>
                   <ExportPanel
                     cssValue={cssExport}
                     jsonValue={jsonExport}
@@ -348,36 +354,12 @@ export function AnalysisWorkspace() {
             </AnimatePresence>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
             <ThemePresetRail activePreset={activePreset} onSelect={(preset) => void handlePresetSelect(preset)} />
             <CustomPaletteInput
               onApply={(palette) => void handleCustomPaletteApply(palette)}
               isActive={activePreset === "custom"}
             />
-            {analysis ? (
-              <PaletteInspector
-                colors={analysis.extractedColors}
-                assignments={analysis.semanticAssignments}
-              />
-            ) : (
-              <Card className="p-5 text-sm leading-6 text-[var(--text-muted)]">
-                Semantic roles and palette clusters will appear here after analysis.
-              </Card>
-            )}
-            {/* <Card className="p-5">
-              <div className="mb-3 text-sm font-semibold text-[var(--text-primary)]">Why this feels intelligent</div>
-              <ul className="space-y-3 text-sm leading-6 text-[var(--text-muted)]">
-                <li>Largest low-chroma regions are treated as backgrounds and surfaces.</li>
-                <li>High-contrast small clusters are promoted into text and border candidates.</li>
-                <li>High-chroma colors are preserved as accent roles across all presets.</li>
-                <li>Accessibility mode repairs contrast instead of preserving broken source choices.</li>
-              </ul>
-              <div className="mt-4">
-                <Button variant="ghost" className="px-0 text-[var(--accent-strong)]">
-                  Deterministic, browser-side, and API-free
-                </Button>
-              </div>
-            </Card> */}
           </div>
         </div>
       </div>

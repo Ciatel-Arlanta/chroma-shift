@@ -55,7 +55,8 @@ export function UploadDropzone({
           handleFile(event.dataTransfer.files?.[0] ?? null);
         }}
         className={cn(
-          "relative rounded-[28px] border border-dashed px-6 py-8 transition duration-200",
+          "relative rounded-[28px] border border-dashed transition duration-200",
+          currentFileName ? "px-5 py-4" : "px-6 py-8",
           isActive
             ? "border-[var(--accent-strong)] bg-[color:color-mix(in_srgb,var(--accent-strong)_10%,transparent)] shadow-[inset_0_0_0_1px_rgba(103,232,249,0.18)]"
             : "border-[var(--line)] bg-[var(--panel-soft)]",
@@ -69,29 +70,41 @@ export function UploadDropzone({
           onChange={(event) => handleFile(event.target.files?.[0] ?? null)}
         />
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-xl space-y-3">
-            <div className="inline-flex size-14 items-center justify-center rounded-[18px] border border-[var(--line)] bg-[var(--panel-elevated)] text-[var(--accent-strong)] shadow-[0_0_30px_rgba(103,232,249,0.12)]">
-              <UploadCloud className="size-6" />
+          {currentFileName ? (
+            <div className="flex items-center gap-4">
+              <div className="inline-flex size-12 items-center justify-center rounded-[14px] border border-[var(--line)] bg-[var(--panel-elevated)] text-[var(--accent-strong)] shadow-[0_0_20px_rgba(103,232,249,0.08)]">
+                <ImagePlus className="size-5" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="text-sm font-semibold text-[var(--text-primary)]">Active source</div>
+                <div className="text-sm text-[var(--text-muted)] truncate max-w-[200px] sm:max-w-xs">{currentFileName}</div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
-                Upload a UI screenshot or SVG
-              </h2>
-              <p className="text-sm leading-6 text-[var(--text-muted)]">
-                Drag in a dashboard, landing page, onboarding flow, or exported design.
-                ChromaShift extracts palette structure, infers roles, and previews remapped themes instantly.
-              </p>
+          ) : (
+            <div className="max-w-xl space-y-3">
+              <div className="inline-flex size-14 items-center justify-center rounded-[18px] border border-[var(--line)] bg-[var(--panel-elevated)] text-[var(--accent-strong)] shadow-[0_0_30px_rgba(103,232,249,0.12)]">
+                <UploadCloud className="size-6" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
+                  Upload a UI screenshot or SVG
+                </h2>
+                <p className="text-sm leading-6 text-[var(--text-muted)]">
+                  Drag in a dashboard, landing page, onboarding flow, or exported design.
+                  ChromaShift extracts palette structure, infers roles, and previews remapped themes instantly.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs text-[var(--text-soft)]">
+                <span>Accepts PNG, JPG, WebP, SVG</span>
+                <span>&bull;</span>
+                <span>Client-side analysis</span>
+                <span>&bull;</span>
+                <span>Best with product UI screenshots</span>
+                <span>&bull;</span>
+                <span>Download-ready previews</span>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs text-[var(--text-soft)]">
-              <span>Accepts PNG, JPG, WebP, SVG</span>
-              <span>&bull;</span>
-              <span>Client-side analysis</span>
-              <span>&bull;</span>
-              <span>Best with product UI screenshots</span>
-              <span>&bull;</span>
-              <span>Download-ready previews</span>
-            </div>
-          </div>
+          )}
 
           <div className="flex flex-col items-stretch gap-3 sm:flex-row lg:flex-col">
             <Button
@@ -100,28 +113,25 @@ export function UploadDropzone({
               disabled={isBusy}
             >
               <ImagePlus className="size-4" />
-              {isBusy ? "Analyzing..." : "Choose file"}
+              {isBusy ? "Analyzing..." : currentFileName ? "Change file" : "Choose file"}
             </Button>
-            <Button variant="secondary" className="w-full sm:w-auto" onClick={onTrySample}>
-              Try sample dashboard
-            </Button>
+            {!currentFileName && (
+              <Button variant="secondary" className="w-full sm:w-auto" onClick={onTrySample}>
+                Try sample dashboard
+              </Button>
+            )}
           </div>
         </div>
 
         <AnimatePresence>
-          {(currentFileName || error) && (
+          {error && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               className="mt-5 flex flex-col gap-2 rounded-2xl border border-[var(--line)] bg-[var(--panel-elevated)] px-4 py-3 text-sm"
             >
-              {currentFileName ? (
-                <div className="text-[var(--text-muted)]">
-                  Active source: <span className="font-medium text-[var(--text-primary)]">{currentFileName}</span>
-                </div>
-              ) : null}
-              {error ? <div className="text-rose-500">{error}</div> : null}
+              <div className="text-rose-500">{error}</div>
             </motion.div>
           )}
         </AnimatePresence>
