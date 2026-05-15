@@ -136,10 +136,10 @@ export function BeforeAfterPreview({
                 {mode === "split" ? (
                   <>
                     <div className="absolute left-5 top-5 z-10 rounded-full border border-[var(--line)] bg-[var(--panel)] px-3 py-1.5 text-[11px] uppercase tracking-[0.24em] text-[var(--text-muted)]">
-                      Original
+                      Remapped
                     </div>
                     <div className="absolute right-5 top-5 z-10 rounded-full border border-[var(--accent-strong)]/20 bg-[color:color-mix(in_srgb,var(--accent-strong)_10%,transparent)] px-3 py-1.5 text-[11px] uppercase tracking-[0.24em] text-[var(--accent-strong)]">
-                      Remapped
+                      Original
                     </div>
                     <div
                       className="absolute top-0 bottom-0 w-px bg-[var(--text-primary)]/40"

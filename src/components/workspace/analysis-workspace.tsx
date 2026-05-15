@@ -364,7 +364,7 @@ export function AnalysisWorkspace() {
                 Semantic roles and palette clusters will appear here after analysis.
               </Card>
             )}
-            <Card className="p-5">
+            {/* <Card className="p-5">
               <div className="mb-3 text-sm font-semibold text-[var(--text-primary)]">Why this feels intelligent</div>
               <ul className="space-y-3 text-sm leading-6 text-[var(--text-muted)]">
                 <li>Largest low-chroma regions are treated as backgrounds and surfaces.</li>
@@ -377,7 +377,7 @@ export function AnalysisWorkspace() {
                   Deterministic, browser-side, and API-free
                 </Button>
               </div>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>
