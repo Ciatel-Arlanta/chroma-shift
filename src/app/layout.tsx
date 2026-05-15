@@ -14,7 +14,22 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://chromashift.dev";
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL.startsWith("http")
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : `https://${process.env.NEXT_PUBLIC_SITE_URL}`;
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "https://chromashift.dev";
+}
+
+const SITE_URL = getBaseUrl();
 
 export const metadata: Metadata = {
   title: {
@@ -44,21 +59,12 @@ export const metadata: Metadata = {
     title: "ChromaShift — Deterministic UI Theme Remapper",
     description:
       "Turn any product screenshot into a polished, shareable theme concept. Browser-side, API-free, instant output.",
-    images: [
-      {
-        url: "/og.png",
-        width: 1200,
-        height: 630,
-        alt: "ChromaShift — Upload, remap, export production-ready UI themes",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "ChromaShift — Deterministic UI Theme Remapper",
     description:
       "Upload a screenshot. Get 6 polished theme variants. Export CSS, Tailwind, or JSON. All in the browser.",
-    images: ["/og.png"],
   },
   icons: {
     icon: "/favicon.png",
