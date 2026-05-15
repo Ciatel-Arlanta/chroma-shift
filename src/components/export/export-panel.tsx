@@ -83,18 +83,17 @@ export function ExportPanel({
           <button
             key={value}
             onClick={() => setTab(value)}
-            className={`rounded-full px-3 py-1.5 text-sm transition ${
-              tab === value
-                ? "bg-[var(--text-primary)] text-[var(--background)]"
-                : "border border-[var(--line)] bg-[var(--panel-soft)] text-[var(--text-muted)]"
-            }`}
+            className={`rounded-full px-3 py-1.5 text-sm transition ${tab === value
+              ? "bg-[var(--text-primary)] text-[var(--background)]"
+              : "border border-[var(--line)] bg-[var(--panel-soft)] text-[var(--text-muted)]"
+              }`}
           >
             {value === "css" ? "global.css" : value}
           </button>
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-[22px] border border-[var(--line)] bg-[var(--panel-soft)]">
+      <div className="flex-1 flex flex-col overflow-hidden rounded-[22px] border border-[var(--line)] bg-[var(--panel-soft)]">
         <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-2 text-xs uppercase tracking-[0.18em] text-[var(--text-soft)]">
           <span>{tab === "css" ? "global.css" : tab}</span>
           <button
@@ -105,7 +104,7 @@ export function ExportPanel({
             {copied === tab ? "Copied" : "Copy"}
           </button>
         </div>
-        <pre className="max-h-72 overflow-auto p-4 text-xs leading-6 text-[var(--text-primary)]">
+        <pre className="max-h-150 flex overflow-auto p-4 text-xs leading-6 text-[var(--text-primary)]">
           <code>{textMap[tab]}</code>
         </pre>
       </div>

@@ -18,34 +18,32 @@ export function PaletteInspector({ colors, assignments }: PaletteInspectorProps)
         </div>
       </div>
 
-      <div className="grid gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {colors.slice(0, 8).map((color, index) => {
           const role = assignments.find((assignment) => assignment.color === color.hex);
           return (
             <motion.div
               key={`${color.hex}-${index}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.03 }}
-              className="rounded-2xl border border-[var(--line)] bg-[var(--panel-soft)] p-3"
+              className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--panel-soft)] transition hover:border-[var(--accent-strong)]/30 hover:bg-[var(--panel-elevated)]"
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className="size-10 rounded-xl border border-[var(--line)]"
-                  style={{ backgroundColor: color.hex }}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate font-mono text-xs text-[var(--text-primary)]">{color.hex}</span>
-                    <span className="text-xs text-[var(--text-muted)]">
-                      {Math.round(color.population * 100)}%
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--text-soft)]">
-                    <span>{role?.role ?? "unassigned"}</span>
-                    <span>&bull;</span>
-                    <span>{role ? `${Math.round(role.confidence * 100)}%` : "cluster"}</span>
-                  </div>
+              <div
+                className="h-16 w-full border-b border-[var(--line)]"
+                style={{ backgroundColor: color.hex }}
+              />
+              <div className="p-3">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="truncate font-mono text-[11px] font-medium text-[var(--text-primary)]">
+                    {color.hex}
+                  </span>
+                  <span className="text-[10px] text-[var(--text-muted)]">
+                    {Math.round(color.population * 100)}%
+                  </span>
+                </div>
+                <div className="mt-1 truncate text-[9px] uppercase tracking-[0.15em] text-[var(--text-soft)]">
+                  {role?.role ?? "unassigned"}
                 </div>
               </div>
             </motion.div>
